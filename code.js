@@ -4,7 +4,7 @@ const test_text2 = document.getElementById('size')
 const airship = document.getElementById("airship")
 
 
-let current_speed = 0
+let current_speed = 1
 let current_x_axis = airship.style.left
 let current_y_axis = airship.style.top
 
@@ -14,8 +14,8 @@ let windowSize = {height: innerHeight, width: innerWidth}
 
 
 document.addEventListener('mousemove',(event)=>{
-     mousePos = {x: event.clientX, y: event.clientY}
-     test_text.textContent = `${mousePos.x - 10}, ${mousePos.y + 10}`
+     mousePos = {x: event.clientX - 15, y: event.clientY - 15    }
+     test_text.textContent = `${mousePos.x }, ${mousePos.y}`
 })
 
 a = setInterval(()=>{moveAirship()},10)
@@ -27,6 +27,7 @@ window.addEventListener('resize',(event)=>{
      test_text2.textContent = `${windowSize.width}, ${windowSize.height}`
 })
 
+//Airship Functions
 
 function outOfBoundsCorrector(maxWidth,maxHeight) { 
      if(current_x_axis >= maxWidth){
@@ -48,35 +49,54 @@ function outOfBoundsCorrector(maxWidth,maxHeight) {
      }
  }
 
+ function momentumLogic(amount){
+     if(amount >= 250){
+          return 6
+     }
+     else if(amount < 250 && amount >= 200){
+          return 5
+     }
+     else if(amount < 200 && amount >= 150){
+          return 4
+     }
+     else if(amount < 150 && amount >= 100){
+          return 3
+     }
+     else if(amount < 100 && amount >= 40){
+          return 2
+     }
+     else if(amount < 40 && amount >= 20){
+          return 1
+     }
+     else{
+          return 0
+     }
+ }
+
  function movementAmountCalculator(){
      movement_x = (mousePos.x - current_x_axis)
      movement_y = (mousePos.y - current_y_axis)
+     movement_x_direction = 1
+     movement_y_direction = 1
+
+     //Chooses the direction of movement
+     if(movement_x < 0){
+          movement_x_direction = -1
+     }
+
+     if(movement_y < 0){
+          movement_y_direction = -1
+     }
+
+     movement_x = Math.abs(movement_x)
+     movement_y = Math.abs(movement_y)
+
 
      //! When at standstill it moves back and forth
-     if(movement_x >= 100){
-          movement_x = 10
-     } else if(movement_x < 100 && movement_x > 0){
-          movement_x = 5
-     } else if(movement_x < 0 && movement_x > -100){
-          movement_x = -5
-     } else if(movement_x <= -100) {
-          movement_x = -10
-     } else{
-          movement_x = 0
-     }
+     movement_x = momentumLogic(movement_x)
+     movement_y = momentumLogic(movement_y)
 
-     if(movement_y >= 100){
-          movement_y = 10
-     } else if(movement_y < 100 && movement_y > 0){
-          movement_y = 5
-     } else if(movement_y < 0 && movement_y > -100){
-          movement_y = -5
-     } else if (movement_y <= -100){
-          movement_y = -10
-     } else{
-          movement_y = 0 
-     }
-     return [movement_x,movement_y]
+     return [movement_x * movement_x_direction ,movement_y * movement_y_direction]
  }
 
 
@@ -84,19 +104,8 @@ function moveAirship(){
      if (current_x_axis == mousePos.x && current_y_axis == mousePos.y){
           return false
      }
-     // movement_x = (mousePos.x - current_x_axis)
-     // movement_y = (mousePos.y - current_y_axis)
-     // if(movement_x > 100){
-     //      movement_x = 10
-     // }
-     // if(movement_x < -100){
-     //      movement_x = -10
-     // }
-     // if(movement_y > 100){
-     //      movement_y = 10
-     // }
 
-     movement= movementAmountCalculator()
+     movement = movementAmountCalculator()
 
      console.log(movement)
      airship.style.top = String(current_y_axis + movement[1]) + "px"
@@ -104,7 +113,9 @@ function moveAirship(){
      current_x_axis += movement[0]
      current_y_axis += movement[1]
 
-     outOfBoundsCorrector(1000,1000)   
+     outOfBoundsCorrector(windowSize.width,windowSize.height)   
      
      return true
 }
+
+//Enemy Functions
